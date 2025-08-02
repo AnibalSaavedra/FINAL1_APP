@@ -1,109 +1,84 @@
-# -*- coding: utf-8 -*-
-# SISTEMA UNIFICADO: MBI 360° - RITUAL (app.py)
-# Autor: Aníbal Saavedra
-
-# ---- MODULO: Disociación o Trauma ----
-
-
-# ---- MODULO: Epigenético Emocional ----
-
-
-# ---- MODULO: Condiciones Clínicas ----
 
 import streamlit as st
+from fpdf import FPDF
+from datetime import datetime
+
+def ejecutar_test_disociacion():
+    st.header("🧠 Módulo 1: Test de disociación o trauma")
+    preguntas = [
+        ("Me desconecto fácilmente de lo que estoy sintiendo en situaciones difíciles.", "explicación 1"),
+        ("A veces actúo como si estuviera en piloto automático y luego no recuerdo bien lo que hice.", "explicación 2"),
+        ("Me cuesta identificar lo que siento o ponerlo en palabras.", "explicación 3"),
+    ]
+    respuestas = []
+    for pregunta, explicacion in preguntas:
+        with st.expander(pregunta):
+            st.markdown(f"🛈 {explicacion}")
+            respuesta = st.slider("Selecciona un nivel:", 1, 5, 3, key=pregunta)
+            respuestas.append(respuesta)
+    if st.button("Generar informe - Test Disociación"):
+        puntaje = sum(respuestas)
+        st.success(f"Puntaje total: {puntaje}")
+        generar_pdf("Test de disociación", respuestas)
+
+def ejecutar_test_epigenetico():
+    st.header("🧬 Módulo 2: Estado epigenético emocional")
+    preguntas = [
+        ("Mi madre vivió situaciones traumáticas antes de que yo naciera.", "Herencia emocional materna"),
+        ("Mi padre fue emocionalmente ausente o rígido.", "Herencia emocional paterna"),
+        ("Siento que repito patrones familiares aunque no quiera.", "Epigenética transgeneracional"),
+    ]
+    respuestas = []
+    for pregunta, explicacion in preguntas:
+        with st.expander(pregunta):
+            st.markdown(f"🛈 {explicacion}")
+            respuesta = st.slider("Selecciona un nivel:", 1, 5, 3, key=pregunta)
+            respuestas.append(respuesta)
+    if st.button("Generar informe - Estado epigenético"):
+        puntaje = sum(respuestas)
+        st.success(f"Puntaje total: {puntaje}")
+        generar_pdf("Estado epigenético emocional", respuestas)
 
 def ejecutar_test_condiciones_clinicas():
-    st.title("🧬 MBI 360° – Módulo 3: Condiciones Clínicas Opcionales")
-    st.markdown("Evalúa tu estado físico a través de síntomas relacionados con metabolismo, digestión, inflamación, hormonas, inmunidad y salud neuropsicológica.")
-    st.markdown("Responde cada afirmación del 1 (nada) al 3 (mucho). Puedes presionar ❓ para entender mejor cada afirmación.")
-
-    afirmaciones = {
-        "Metabolismo": [
-            ("Siento cansancio excesivo incluso después de dormir.", "Podrías tener un metabolismo lento o desequilibrio energético celular."),
-            ("Mi peso varía fácilmente sin causa aparente.", "El metabolismo alterado influye en la regulación de peso corporal."),
-            ("Me cuesta mantenerme activo o motivado físicamente.", "Una baja eficiencia metabólica puede reducir tu energía.")
-        ],
-        "Digestión": [
-            ("Frecuentemente tengo hinchazón o gases después de comer.", "Puede deberse a una mala digestión o disbiosis intestinal."),
-            ("Sufro de estreñimiento o diarrea de forma regular.", "Puede ser por estrés o alimentos inflamatorios."),
-            ("Siento pesadez o lentitud mental luego de las comidas.", "Tu cuerpo puede estar sobrecargado procesando alimentos.")
-        ],
-        "Inflamación": [
-            ("Siento dolor muscular o articular sin haberme exigido físicamente.", "Puede indicar inflamación crónica en tejidos blandos."),
-            ("Mi piel suele enrojecerse, picar o tener brotes.", "Las inflamaciones internas a menudo se manifiestan en la piel."),
-            ("Retengo líquidos o me hincho con facilidad.", "Un sistema inflamado tiende a acumular líquidos.")
-        ],
-        "Salud Hormonal": [
-            ("Mis cambios de humor son intensos o impredecibles.", "Las hormonas influyen directamente en el equilibrio emocional."),
-            ("Siento disminución del deseo sexual sin causa aparente.", "Puede estar relacionado con un desequilibrio hormonal."),
-            ("Mis ciclos menstruales o patrones hormonales son irregulares.", "Puede ser señal de desregulación endocrina.")
-        ],
-        "Inmunidad": [
-            ("Me enfermo con frecuencia (resfríos, virus, etc.).", "Tu sistema inmune podría estar debilitado."),
-            ("Tardo más tiempo del habitual en recuperarme de enfermedades.", "Una inmunidad baja puede dificultar la recuperación."),
-            ("Siento fatiga inmune (como si estuviera siempre en modo alerta).", "Tu sistema inmune puede estar hiperactivo.")
-        ],
-        "Neuropsicológicos": [
-            ("Tengo problemas de memoria o concentración frecuentes.", "Tu sistema nervioso puede estar afectado por estrés o inflamación."),
-            ("Siento ansiedad o nerviosismo constante.", "Refleja desregulación del sistema nervioso autónomo."),
-            ("Me cuesta mantener el ánimo estable durante el día.", "Puede haber desequilibrio entre neurotransmisores y hormonas.")
-        ]
+    st.header("🩺 Módulo 3: Condiciones clínicas")
+    categorias = {
+        "Metabolismo": ["Fatiga después de comer", "Aumento de peso sin causa aparente"],
+        "Digestión": ["Distensión abdominal", "Dificultad para digerir ciertos alimentos"],
+        "Inflamación": ["Dolores articulares recurrentes", "Sensación de cuerpo inflamado"],
     }
-
-    resultados = {}
-    for categoria, items in afirmaciones.items():
+    respuestas = {}
+    for categoria, items in categorias.items():
         st.subheader(f"🔹 {categoria}")
-        for idx, (texto, explicacion) in enumerate(items):
-            col1, col2 = st.columns([4, 1])
-            with col1:
-                seleccion = st.radio(texto, [1, 2, 3], key=f"{categoria}_{idx}")
-                resultados[f"{categoria}_{idx}"] = seleccion
-            with col2:
-                with st.expander("❓"):
-                    st.caption(explicacion)
+        for item in items:
+            valor = st.radio(item, ["1 (Nunca)", "2 (A veces)", "3 (Frecuente)"], key=item)
+            respuestas[item] = valor
+    if st.button("Generar informe - Condiciones clínicas"):
+        generar_pdf("Condiciones clínicas", list(respuestas.values()))
 
-    if st.button("✅ Finalizar evaluación"):
-        st.success("Tus respuestas han sido registradas. Pronto podrás descargar el informe personalizado.")
+def generar_pdf(titulo, respuestas):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt="Informe MBI 360°", ln=1, align="C")
+    pdf.cell(200, 10, txt=f"Módulo: {titulo}", ln=2, align="C")
+    pdf.ln(10)
+    for i, r in enumerate(respuestas, 1):
+        pdf.cell(200, 10, txt=f"Ítem {i}: {r}", ln=1)
+    fecha = datetime.now().strftime("%Y-%m-%d %H:%M")
+    pdf.ln(10)
+    pdf.cell(200, 10, txt=f"Fecha de generación: {fecha}", ln=1)
+    pdf.output("/mnt/data/informe_mbi360.pdf")
+    st.success("✅ Informe generado con éxito.")
+    st.download_button("Descargar informe", data=open("/mnt/data/informe_mbi360.pdf", "rb"), file_name="informe_mbi360.pdf")
 
-
-# ---- APP PRINCIPAL ----
-
-import streamlit as st
-from modulo_disociacion import ejecutar_test_disociacion
-from modulo_epigenetico import ejecutar_test_epigenetico
-from modulo_condiciones import ejecutar_test_condiciones_clinicas
-
-st.set_page_config(page_title="MBI 360°", page_icon="🌀", layout="centered")
-
-st.title("🌀 MBI 360° – Evaluación Integral del Ser")
-
-st.markdown("""
-Bienvenido al sistema **MBI 360°**, una herramienta única para conocer en profundidad tu estado emocional, epigenético, físico y energético.
-
-**Marca:** RITUAL  
-**Creador:** Aníbal Saavedra – Biotecnólogo MIB
-""")
-
-st.markdown("### Selecciona uno o varios módulos que deseas realizar:")
-
-modulos = [
-    "Test de disociación o trauma",
-    "Estado epigenético emocional (líneas materna/paterna)",
-    "Condiciones clínicas opcionales"
-]
-
-modulos_seleccionados = st.multiselect("", modulos)
-
-if not modulos_seleccionados:
-    st.warning("Selecciona al menos un módulo para continuar.")
-else:
-    if "Test de disociación o trauma" in modulos_seleccionados:
-        ejecutar_test_disociacion()
-    if "Estado epigenético emocional (líneas materna/paterna)" in modulos_seleccionados:
-        ejecutar_test_epigenetico()
-    if "Condiciones clínicas opcionales" in modulos_seleccionados:
-        ejecutar_test_condiciones_clinicas()
-
-st.markdown("---")
-st.markdown("📲 ¿Necesitas ayuda o una consulta personalizada? [Contáctame por WhatsApp](https://wa.me/56967010107)")
-
+# Interfaz principal
+st.title("🌐 MBI 360° – Evaluación Integral del Ser")
+st.markdown("Bienvenido al sistema **MBI 360°**, una herramienta para conocer en profundidad tu estado emocional, epigenético, físico y energético.")
+modulos = {
+    "Test de disociación o trauma": ejecutar_test_disociacion,
+    "Estado epigenético emocional": ejecutar_test_epigenetico,
+    "Condiciones clínicas (metabolismo, digestión, inflamación)": ejecutar_test_condiciones_clinicas,
+}
+seleccionados = st.multiselect("Selecciona los módulos que deseas realizar:", list(modulos.keys()))
+for modulo in seleccionados:
+    modulos[modulo]()
